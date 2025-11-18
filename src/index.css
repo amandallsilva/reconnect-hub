@@ -18,31 +18,33 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 200 15% 25%;
 
-    --primary: 197 23% 54%; /* #6D96A6 teal-blue */
+    --primary: 193 45% 50%; /* Brighter teal-blue */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 145 25% 65%; /* Soft sage green */
-    --secondary-foreground: 200 15% 15%;
+    --secondary: 160 40% 50%; /* Vibrant sage green */
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 28 20% 88%;
     --muted-foreground: 200 10% 45%;
 
-    --accent: 195 35% 35%; /* Deep petrol */
-    --accent-foreground: 0 0% 100%;
+    --accent: 28 85% 65%; /* Warm coral */
+    --accent-foreground: 200 20% 20%;
 
-    --destructive: 0 70% 60%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 28 15% 85%;
     --input: 28 15% 90%;
-    --ring: 197 23% 54%;
+    --ring: 193 45% 50%;
 
     --radius: 1rem; /* Smooth, rounded aesthetic */
     
     /* Custom wellness tokens */
-    --wellness-glow: 197 40% 70%;
-    --reconnect-green: 145 30% 55%;
-    --calm-blue: 210 45% 65%;
+    --wellness-glow: 45 95% 70%;
+    --reconnect-green: 145 55% 55%;
+    --calm-blue: 200 50% 65%;
+    --coral: 15 80% 65%;
+    --golden: 45 90% 60%;
     
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(197 23% 54%) 0%, hsl(145 25% 65%) 100%);
@@ -73,33 +75,39 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 200 20% 12%;
+    --background: 200 25% 12%;
     --foreground: 28 25% 92%;
 
-    --card: 200 18% 15%;
+    --card: 200 20% 16%;
     --card-foreground: 28 25% 92%;
 
-    --popover: 200 18% 15%;
+    --popover: 200 20% 16%;
     --popover-foreground: 28 25% 92%;
 
-    --primary: 197 23% 54%;
+    --primary: 193 45% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 145 20% 45%;
+    --secondary: 160 40% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 200 15% 20%;
-    --muted-foreground: 28 15% 65%;
+    --muted: 200 15% 22%;
+    --muted-foreground: 28 15% 70%;
 
-    --accent: 195 35% 35%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 28 85% 65%;
+    --accent-foreground: 200 20% 12%;
 
-    --destructive: 0 70% 60%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 200 15% 25%;
-    --input: 200 15% 20%;
-    --ring: 197 23% 54%;
+    --input: 200 15% 25%;
+    --ring: 193 45% 55%;
+    
+    --wellness-glow: 45 85% 65%;
+    --reconnect-green: 145 50% 55%;
+    --calm-blue: 200 45% 60%;
+    --coral: 15 75% 60%;
+    --golden: 45 85% 55%;
     
     --sidebar-background: 200 20% 10%;
     --sidebar-foreground: 28 25% 85%;

@@ -66,6 +66,8 @@ export default {
         calm: {
           blue: "hsl(var(--calm-blue))",
         },
+        coral: "hsl(var(--coral))",
+        golden: "hsl(var(--golden))",
       },
       borderRadius: {
         lg: "var(--radius)",
