@@ -1,9 +1,11 @@
 import { NavLink } from "@/components/NavLink";
-import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut } from "lucide-react";
+import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut, Moon, Sun } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Switch } from "@/components/ui/switch";
 
 const navItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
@@ -15,6 +17,7 @@ const navItems = [
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   
   const handleLogout = () => {
     // Clear any auth data here if needed
@@ -55,8 +58,27 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Daily Tip & Logout */}
+      {/* Theme Toggle, Daily Tip & Logout */}
       <div className="p-4 mt-auto space-y-3">
+        {/* Theme Toggle */}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-card/50">
+          <div className="flex items-center gap-2">
+            {theme === "dark" ? (
+              <Moon className="w-4 h-4 text-primary" />
+            ) : (
+              <Sun className="w-4 h-4 text-primary" />
+            )}
+            <span className="text-sm font-medium">
+              {theme === "dark" ? "Modo Escuro" : "Modo Claro"}
+            </span>
+          </div>
+          <Switch
+            checked={theme === "dark"}
+            onCheckedChange={toggleTheme}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
+
         <Card className="p-4 bg-gradient-to-br from-wellness-glow/30 to-primary/20 border-primary/30 shadow-md">
           <div className="flex items-start gap-3">
             <Lightbulb className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
