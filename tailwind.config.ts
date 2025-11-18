@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        wellness: {
+          glow: "hsl(var(--wellness-glow))",
+        },
+        reconnect: {
+          green: "hsl(var(--reconnect-green))",
+        },
+        calm: {
+          blue: "hsl(var(--calm-blue))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
