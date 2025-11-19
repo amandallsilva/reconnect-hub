@@ -1,10 +1,13 @@
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Target, Trophy, TrendingUp, Sparkles } from "lucide-react";
+import { Flame, Target, Trophy, TrendingUp } from "lucide-react";
 import heroWellness from "@/assets/hero-wellness.jpg";
+import { useData } from "@/contexts/DataContext";
 
 export default function Dashboard() {
+  const { profile } = useData();
+
   return (
     <div className="container mx-auto p-6 space-y-6 max-w-6xl">
       {/* Hero Section */}
@@ -18,13 +21,12 @@ export default function Dashboard() {
           <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-transparent flex items-center">
             <div className="p-8 space-y-3 max-w-xl">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-wellness-glow" />
                 <Badge className="bg-wellness-glow/20 text-wellness-glow border-wellness-glow/30">
-                  Nível 7
+                  Nível {profile.level}
                 </Badge>
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
-                Bem-vindo de volta, João!
+                Bem-vindo de volta, {profile.name.split(' ')[0]}!
               </h1>
               <p className="text-muted-foreground text-lg">
                 Continue sua jornada de reconexão 🌱
@@ -40,7 +42,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Nível Atual</p>
-              <p className="text-4xl font-bold bg-gradient-to-r from-golden to-primary bg-clip-text text-transparent">7</p>
+              <p className="text-4xl font-bold bg-gradient-to-r from-golden to-primary bg-clip-text text-transparent">{profile.level}</p>
             </div>
             <Trophy className="w-12 h-12 text-golden" />
           </div>
@@ -50,7 +52,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Dias sem IA</p>
-              <p className="text-4xl font-bold bg-gradient-to-r from-coral to-secondary bg-clip-text text-transparent">12</p>
+              <p className="text-4xl font-bold bg-gradient-to-r from-coral to-secondary bg-clip-text text-transparent">{profile.daysWithoutAI}</p>
             </div>
             <Flame className="w-12 h-12 text-coral" />
           </div>
@@ -60,7 +62,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Desafios Ativos</p>
-              <p className="text-4xl font-bold bg-gradient-to-r from-accent to-wellness-glow bg-clip-text text-transparent">5</p>
+              <p className="text-4xl font-bold bg-gradient-to-r from-accent to-wellness-glow bg-clip-text text-transparent">{profile.activeChallenges}</p>
             </div>
             <Target className="w-12 h-12 text-accent" />
           </div>

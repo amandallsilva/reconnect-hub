@@ -1,10 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, Calendar, Target, TrendingUp, Award, Shield, Star, Flame } from "lucide-react";
+import { Trophy, Calendar, Target, TrendingUp, Award, Shield, Star, Flame, Edit2, Save, X } from "lucide-react";
+import { useData } from "@/contexts/DataContext";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import achievementsImg from "@/assets/achievements.jpg";
 
 const achievements = [
@@ -27,40 +33,133 @@ const weeklyReport = [
 ];
 
 export default function Profile() {
+  const { profile, updateProfile } = useData();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState(profile);
+  const { toast } = useToast();
+
+  const handleSave = () => {
+    updateProfile(editedProfile);
+    setIsEditing(false);
+    toast({
+      title: "Perfil atualizado! ✨",
+      description: "Suas informações foram salvas com sucesso"
+    });
+  };
+
+  const handleCancel = () => {
+    setEditedProfile(profile);
+    setIsEditing(false);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6 max-w-6xl">
       {/* Profile Header */}
       <Card className="p-8 bg-gradient-to-br from-primary/10 via-card to-secondary/10 border-primary/20 shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           <Avatar className="w-24 h-24 ring-4 ring-primary/20">
-            <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">JD</AvatarFallback>
+            <AvatarImage src={profile.avatar} />
+            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">
+              {getInitials(profile.name)}
+            </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 space-y-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
-                João da Silva
-              </h1>
-              <p className="text-muted-foreground">@joao_silva</p>
-            </div>
+          <div className="flex-1 space-y-4 w-full">
+            {isEditing ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome completo</Label>
+                    <Input
+                      id="name"
+                      value={editedProfile.name}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                      className="border-primary/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Nome de usuário</Label>
+                    <Input
+                      id="username"
+                      value={editedProfile.username}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, username: e.target.value })}
+                      className="border-primary/20"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editedProfile.email}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+                    className="border-primary/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={editedProfile.bio || ""}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, bio: e.target.value })}
+                    className="border-primary/20 min-h-[80px]"
+                    placeholder="Conte um pouco sobre você..."
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
+                  </Button>
+                  <Button onClick={handleCancel} variant="outline">
+                    <X className="w-4 h-4 mr-2" />
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+                    {profile.name}
+                  </h1>
+                  <p className="text-muted-foreground">@{profile.username}</p>
+                  {profile.bio && (
+                    <p className="text-sm text-muted-foreground mt-2">{profile.bio}</p>
+                  )}
+                </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge className="gap-1 bg-gradient-to-r from-golden to-primary border-golden/30">
-                <Trophy className="w-3 h-3" />
-                Nível 7
-              </Badge>
-              <Badge className="gap-1 bg-gradient-to-r from-coral to-secondary border-coral/30">
-                <Flame className="w-3 h-3" />
-                12 dias sem IA
-              </Badge>
-              <Badge className="gap-1 bg-gradient-to-r from-reconnect-green to-primary border-reconnect-green/30">
-                <Target className="w-3 h-3" />
-                5 desafios ativos
-              </Badge>
-            </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="gap-1 bg-gradient-to-r from-golden to-primary border-golden/30">
+                    <Trophy className="w-3 h-3" />
+                    Nível {profile.level}
+                  </Badge>
+                  <Badge className="gap-1 bg-gradient-to-r from-coral to-secondary border-coral/30">
+                    <Flame className="w-3 h-3" />
+                    {profile.daysWithoutAI} dias sem IA
+                  </Badge>
+                  <Badge className="gap-1 bg-gradient-to-r from-reconnect-green to-primary border-reconnect-green/30">
+                    <Target className="w-3 h-3" />
+                    {profile.activeChallenges} desafios ativos
+                  </Badge>
+                </div>
 
-            <Button variant="outline" className="mt-2">Editar Perfil</Button>
+                <Button onClick={() => setIsEditing(true)} variant="outline" className="mt-2">
+                  <Edit2 className="w-4 h-4 mr-2" />
+                  Editar Perfil
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Card>
@@ -72,11 +171,11 @@ export default function Profile() {
             <h2 className="text-xl font-semibold bg-gradient-to-r from-golden to-primary bg-clip-text text-transparent">
               Progresso de Nível
             </h2>
-            <Badge className="bg-golden/20 text-golden border-golden/30">Nível 7</Badge>
+            <Badge className="bg-golden/20 text-golden border-golden/30">Nível {profile.level}</Badge>
           </div>
-          <Progress value={65} className="h-4" />
+          <Progress value={(profile.xp % 5000) / 50} className="h-4" />
           <p className="text-sm text-muted-foreground">
-            3.250 / 5.000 XP para o próximo nível 🎯
+            {profile.xp} / {(profile.level + 1) * 5000} XP para o próximo nível 🎯
           </p>
         </div>
       </Card>
