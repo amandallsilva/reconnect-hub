@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut, Moon, Sun } from "lucide-react";
+import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ const navItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: Calendar, label: "Desafios", path: "/challenges" },
   { icon: Users, label: "Eventos", path: "/events" },
+  { icon: MessageSquare, label: "Comunidade", path: "/community" },
   { icon: Brain, label: "Consciência Digital", path: "/digital-consciousness" },
   { icon: User, label: "Perfil", path: "/profile" },
 ];

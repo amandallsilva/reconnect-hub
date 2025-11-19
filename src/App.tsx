@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { DataProvider } from "@/contexts/DataContext";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -16,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import Challenges from "./pages/Challenges";
 import Profile from "./pages/Profile";
+import Community from "./pages/Community";
 import DigitalConsciousness from "./pages/DigitalConsciousness";
 import NotFound from "./pages/NotFound";
 
@@ -24,11 +26,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+      <DataProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -39,14 +42,16 @@ const App = () => (
           <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
           <Route path="/events" element={<AppLayout><Events /></AppLayout>} />
           <Route path="/challenges" element={<AppLayout><Challenges /></AppLayout>} />
+          <Route path="/community" element={<AppLayout><Community /></AppLayout>} />
           <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
           <Route path="/digital-consciousness" element={<AppLayout><DigitalConsciousness /></AppLayout>} />
           
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      </TooltipProvider>
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+        </TooltipProvider>
+      </DataProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
