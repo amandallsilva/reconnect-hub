@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Send, Trash2, Award } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
@@ -69,6 +69,7 @@ export default function Community() {
       <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 shadow-md">
         <div className="flex gap-4">
           <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+            <AvatarImage src={profile.avatar} />
             <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
               {getInitials(profile.name)}
             </AvatarFallback>
@@ -115,6 +116,7 @@ export default function Community() {
               <div className="flex items-start justify-between">
                 <div className="flex gap-3">
                   <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                    <AvatarImage src={post.author.avatar} />
                     <AvatarFallback className={
                       post.author.isExpert
                         ? "bg-gradient-to-br from-golden to-primary text-white"
