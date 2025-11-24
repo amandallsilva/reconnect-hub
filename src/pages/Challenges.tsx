@@ -78,25 +78,25 @@ export default function Challenges() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
-      <div className="space-y-3">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl">
+      <div className="space-y-2 sm:space-y-3">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
           Seus Desafios
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-base sm:text-lg">
           Complete desafios diários e evolua na sua jornada 🎯
         </p>
       </div>
 
-      <Tabs defaultValue="active" className="space-y-6">
+      <Tabs defaultValue="active" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/50">
-          <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+          <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-white text-xs sm:text-sm">
             Ativos
           </TabsTrigger>
-          <TabsTrigger value="completed" className="data-[state=active]:bg-secondary data-[state=active]:text-white">
+          <TabsTrigger value="completed" className="data-[state=active]:bg-secondary data-[state=active]:text-white text-xs sm:text-sm">
             Concluídos
           </TabsTrigger>
-          <TabsTrigger value="discover" className="data-[state=active]:bg-accent data-[state=active]:text-white">
+          <TabsTrigger value="discover" className="data-[state=active]:bg-accent data-[state=active]:text-white text-xs sm:text-sm">
             Descobrir
           </TabsTrigger>
         </TabsList>

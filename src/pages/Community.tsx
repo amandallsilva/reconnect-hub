@@ -54,13 +54,13 @@ export default function Community() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-4xl">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-4xl">
       {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+      <div className="space-y-2 sm:space-y-3">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
           Comunidade ReConectar
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-base sm:text-lg">
           Compartilhe sua jornada e inspire outras pessoas 💬
         </p>
       </div>

@@ -66,26 +66,26 @@ const events = [
 
 export default function Events() {
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl">
       {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+      <div className="space-y-2 sm:space-y-3">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
           Eventos & Atividades
         </h1>
-        <p className="text-muted-foreground text-lg">Reconecte-se através de experiências reais 🌟</p>
+        <p className="text-muted-foreground text-base sm:text-lg">Reconecte-se através de experiências reais 🌟</p>
       </div>
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        <Badge className="cursor-pointer bg-primary/20 text-primary border-primary/30 hover:bg-primary/30">Todos</Badge>
-        <Badge variant="outline" className="cursor-pointer hover:bg-muted">Arte</Badge>
-        <Badge variant="outline" className="cursor-pointer hover:bg-muted">Educação</Badge>
-        <Badge variant="outline" className="cursor-pointer hover:bg-muted">Bem-estar</Badge>
-        <Badge variant="outline" className="cursor-pointer hover:bg-muted">Cultura</Badge>
+        <Badge className="cursor-pointer bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 text-xs sm:text-sm">Todos</Badge>
+        <Badge variant="outline" className="cursor-pointer hover:bg-muted text-xs sm:text-sm">Arte</Badge>
+        <Badge variant="outline" className="cursor-pointer hover:bg-muted text-xs sm:text-sm">Educação</Badge>
+        <Badge variant="outline" className="cursor-pointer hover:bg-muted text-xs sm:text-sm">Bem-estar</Badge>
+        <Badge variant="outline" className="cursor-pointer hover:bg-muted text-xs sm:text-sm">Cultura</Badge>
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {events.map((event, idx) => (
           <Card key={idx} className="overflow-hidden hover:shadow-xl hover:scale-105 transition-all bg-gradient-to-br from-card to-primary/5 border-primary/20">
             {event.image && (

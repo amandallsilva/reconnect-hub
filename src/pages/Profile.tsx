@@ -100,12 +100,12 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl">
       {/* Profile Header */}
-      <Card className="p-8 bg-gradient-to-br from-primary/10 via-card to-secondary/10 border-primary/20 shadow-xl">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-          <div className="relative">
-            <Avatar className="w-24 h-24 ring-4 ring-primary/20">
+      <Card className="p-4 sm:p-8 bg-gradient-to-br from-primary/10 via-card to-secondary/10 border-primary/20 shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6">
+          <div className="relative mx-auto md:mx-0">
+            <Avatar className="w-20 h-20 sm:w-24 sm:h-24 ring-4 ring-primary/20">
               <AvatarImage src={isEditing ? editedProfile.avatar : profile.avatar} />
               <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">
                 {getInitials(isEditing ? editedProfile.name : profile.name)}
@@ -253,15 +253,15 @@ export default function Profile() {
       </Card>
 
       {/* Achievements Section */}
-      <Card className="p-6 bg-gradient-to-br from-wellness-glow/10 to-golden/10 border-golden/20 shadow-lg overflow-hidden">
+      <Card className="p-4 sm:p-6 bg-gradient-to-br from-wellness-glow/10 to-golden/10 border-golden/20 shadow-lg overflow-hidden">
         <div className="relative">
-          <div className="absolute top-0 right-0 w-64 h-64 opacity-20">
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 opacity-20">
             <img src={achievementsImg} alt="Conquistas" className="w-full h-full object-contain" />
           </div>
-          <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-golden to-primary bg-clip-text text-transparent relative z-10">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 bg-gradient-to-r from-golden to-primary bg-clip-text text-transparent relative z-10">
             Conquistas Desbloqueadas
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 relative z-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 relative z-10">
             {achievements.map((achievement, idx) => (
               <div
                 key={idx}
@@ -309,7 +309,7 @@ export default function Profile() {
       </Card>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card className="p-6 bg-gradient-to-br from-primary/10 to-calm-blue/10 border-primary/20 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>

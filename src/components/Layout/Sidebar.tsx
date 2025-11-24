@@ -16,17 +16,25 @@ const navItems = [
   { icon: User, label: "Perfil", path: "/profile" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   
   const handleLogout = () => {
-    // Clear any auth data here if needed
     navigate("/login");
+    onNavigate?.();
+  };
+
+  const handleNavClick = () => {
+    onNavigate?.();
   };
 
   return (
-    <aside className="w-64 h-screen bg-gradient-to-b from-card via-primary/5 to-secondary/5 border-r border-border flex flex-col fixed left-0 top-0 shadow-lg">
+    <aside className="w-64 h-screen bg-gradient-to-b from-card via-primary/5 to-secondary/5 border-r border-border flex flex-col lg:fixed left-0 top-0 shadow-lg overflow-y-auto">
       {/* Logo */}
       <div className="p-6 space-y-2">
         <div className="flex items-center gap-2">
@@ -50,6 +58,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={handleNavClick}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all"
             activeClassName="bg-gradient-to-r from-primary/15 to-secondary/15 text-primary font-semibold shadow-sm"
           >
