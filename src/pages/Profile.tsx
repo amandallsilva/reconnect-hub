@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, Calendar, Target, TrendingUp, Award, Shield, Star, Flame, Edit2, Save, X } from "lucide-react";
+import { Trophy, Calendar, Target, TrendingUp, Award, Shield, Star, Flame, Edit2, Save, X, Camera, Upload } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import achievementsImg from "@/assets/achievements.jpg";
 
 const achievements = [
@@ -37,6 +38,12 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sincronizar editedProfile com profile quando profile mudar
+  useEffect(() => {
+    setEditedProfile(profile);
+  }, [profile]);
 
   const handleSave = () => {
     updateProfile(editedProfile);
@@ -50,6 +57,37 @@ export default function Profile() {
   const handleCancel = () => {
     setEditedProfile(profile);
     setIsEditing(false);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tamanho (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      sonnerToast.error("Arquivo muito grande", {
+        description: "A imagem deve ter no máximo 2MB"
+      });
+      return;
+    }
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      sonnerToast.error("Formato inválido", {
+        description: "Apenas imagens são permitidas"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setEditedProfile({ ...editedProfile, avatar: base64String });
+      sonnerToast.success("Foto carregada!", {
+        description: "Clique em Salvar para aplicar as mudanças"
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const getInitials = (name: string) => {
@@ -66,16 +104,50 @@ export default function Profile() {
       {/* Profile Header */}
       <Card className="p-8 bg-gradient-to-br from-primary/10 via-card to-secondary/10 border-primary/20 shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-          <Avatar className="w-24 h-24 ring-4 ring-primary/20">
-            <AvatarImage src={profile.avatar} />
-            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">
-              {getInitials(profile.name)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="w-24 h-24 ring-4 ring-primary/20">
+              <AvatarImage src={isEditing ? editedProfile.avatar : profile.avatar} />
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-white">
+                {getInitials(isEditing ? editedProfile.name : profile.name)}
+              </AvatarFallback>
+            </Avatar>
+            
+            {isEditing && (
+              <>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute -bottom-2 -right-2 rounded-full w-10 h-10 shadow-lg bg-primary hover:bg-primary/90 text-white"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="w-5 h-5" />
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </>
+            )}
+          </div>
 
           <div className="flex-1 space-y-4 w-full">
             {isEditing ? (
               <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Upload className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Foto de Perfil</p>
+                      <p className="text-xs text-muted-foreground">
+                        Clique no ícone da câmera para alterar
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome completo</Label>
