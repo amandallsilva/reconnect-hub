@@ -9,26 +9,26 @@ export default function Dashboard() {
   const { profile } = useData();
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl">
       {/* Hero Section */}
       <Card className="relative overflow-hidden border-none shadow-xl">
-        <div className="relative h-48 md:h-64">
+        <div className="relative h-40 sm:h-48 md:h-64">
           <img 
             src={heroWellness} 
             alt="Bem-estar digital" 
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-transparent flex items-center">
-            <div className="p-8 space-y-3 max-w-xl">
+            <div className="p-4 sm:p-8 space-y-2 sm:space-y-3 max-w-xl">
               <div className="flex items-center gap-2">
-                <Badge className="bg-wellness-glow/20 text-wellness-glow border-wellness-glow/30">
+                <Badge className="bg-wellness-glow/20 text-wellness-glow border-wellness-glow/30 text-xs sm:text-sm">
                   Nível {profile.level}
                 </Badge>
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
                 Bem-vindo de volta, {profile.name.split(' ')[0]}!
               </h1>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
                 Continue sua jornada de reconexão 🌱
               </p>
             </div>
@@ -37,7 +37,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="p-6 bg-gradient-to-br from-golden/20 via-card to-primary/10 border-golden/30 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
