@@ -4,21 +4,28 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Target, BookOpen, Moon, Coffee, Smartphone, CheckCircle2, Calendar } from "lucide-react";
-import { useChallenges } from "@/hooks/useChallenges";
+import { Target, BookOpen, Moon, Coffee, Smartphone, CheckCircle2, Calendar, Trophy, Sparkles } from "lucide-react";
+import { useChallenges, availableChallenges } from "@/hooks/useChallenges";
+import { useData } from "@/contexts/DataContext";
 import { useState } from "react";
+import { toast } from "sonner";
 
-const completedChallenges = [
-  { title: "7 dias sem fast food", completedAt: "10 Jan 2025", xp: 500 },
-  { title: "Escrever diário por 14 dias", completedAt: "05 Jan 2025", xp: 800 },
-  { title: "Caminhada diária", completedAt: "28 Dez 2024", xp: 600 },
-];
+const difficultyMap: Record<number, string> = {
+  7: "Fácil",
+  14: "Fácil",
+  15: "Fácil",
+  21: "Médio",
+  30: "Médio",
+  90: "Difícil"
+};
 
-const popularChallenges = [
-  { title: "Desafio 90 dias sem IA", difficulty: "Difícil", participants: "2.5k", icon: Target },
-  { title: "Café da manhã consciente", difficulty: "Fácil", participants: "8.3k", icon: Coffee },
-  { title: "Leitura de 1 livro/mês", difficulty: "Médio", participants: "5.1k", icon: BookOpen },
-];
+const participantsMap: Record<string, string> = {
+  "90-days-no-ai": "2.5k",
+  "conscious-breakfast": "8.3k",
+  "monthly-book": "5.1k",
+  "journal-writing": "3.2k",
+  "daily-walk": "6.7k"
+};
 
 const iconMap = {
   Smartphone,
@@ -27,8 +34,39 @@ const iconMap = {
 };
 
 export default function Challenges() {
-  const { challenges, toggleDayCompletion } = useChallenges();
+  const { challenges, completedChallenges, toggleDayCompletion, completeChallenge, startChallenge } = useChallenges();
+  const { profile, updateProfile } = useData();
   const [expandedChallenge, setExpandedChallenge] = useState<string | null>(null);
+
+  const handleCompleteChallenge = (challengeId: string) => {
+    const xpGained = completeChallenge(challengeId);
+    updateProfile({
+      xp: profile.xp + xpGained,
+      level: profile.level + Math.floor(xpGained / 1000),
+      activeChallenges: Math.max(0, profile.activeChallenges - 1)
+    });
+    
+    toast.success("🎉 Desafio Concluído!", {
+      description: `Você ganhou ${xpGained} XP! Continue assim!`
+    });
+  };
+
+  const handleStartChallenge = (challengeTemplate: typeof availableChallenges[0]) => {
+    const alreadyActive = challenges.some(c => c.id === challengeTemplate.id);
+    if (alreadyActive) {
+      toast.error("Você já está fazendo este desafio!");
+      return;
+    }
+
+    startChallenge(challengeTemplate);
+    updateProfile({
+      activeChallenges: profile.activeChallenges + 1
+    });
+    
+    toast.success("✨ Novo Desafio Iniciado!", {
+      description: `${challengeTemplate.title} adicionado aos seus desafios ativos!`
+    });
+  };
 
   const getIcon = (iconName: string) => {
     return iconMap[iconName as keyof typeof iconMap] || Target;
@@ -91,17 +129,30 @@ export default function Challenges() {
                       
                       <div className="space-y-2">
                         <Progress value={challenge.progress} className="h-3" />
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between items-center text-sm">
                           <span className="text-muted-foreground font-medium">
                             {challenge.progress}% completo
                           </span>
-                          <Button 
-                            variant="link" 
-                            className="h-auto p-0 text-primary"
-                            onClick={() => setExpandedChallenge(isExpanded ? null : challenge.id)}
-                          >
-                            {isExpanded ? "Ocultar dias" : "Ver todos os dias"}
-                          </Button>
+                          <div className="flex gap-2">
+                            {challenge.progress === 100 && (
+                              <Button
+                                size="sm"
+                                className="bg-gradient-to-r from-secondary to-reconnect-green hover:from-secondary/90 hover:to-reconnect-green/90 text-white"
+                                onClick={() => handleCompleteChallenge(challenge.id)}
+                              >
+                                <Trophy className="w-4 h-4 mr-1" />
+                                Finalizar
+                              </Button>
+                            )}
+                            <Button 
+                              variant="link" 
+                              size="sm"
+                              className="h-auto p-0 text-primary"
+                              onClick={() => setExpandedChallenge(isExpanded ? null : challenge.id)}
+                            >
+                              {isExpanded ? "Ocultar dias" : "Ver todos os dias"}
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
@@ -164,33 +215,57 @@ export default function Challenges() {
 
         <TabsContent value="discover" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {popularChallenges.map((challenge, idx) => (
-              <Card key={idx} className="p-6 hover:shadow-xl hover:scale-105 transition-all bg-gradient-to-br from-card to-accent/5 border-accent/20">
-                <div className="flex items-start gap-4">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-accent/20 to-coral/20">
-                    <challenge.icon className="w-8 h-8 text-accent" />
-                  </div>
-                  
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">{challenge.title}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline" className="border-accent/30">
-                          {challenge.difficulty}
-                        </Badge>
-                        <Badge variant="outline" className="border-primary/30">
-                          👥 {challenge.participants} participantes
-                        </Badge>
-                      </div>
+            {availableChallenges.map((challenge) => {
+              const Icon = getIcon(challenge.icon);
+              const difficulty = difficultyMap[challenge.totalDays] || "Médio";
+              const participants = participantsMap[challenge.id] || "1.2k";
+              const isActive = challenges.some(c => c.id === challenge.id);
+
+              return (
+                <Card key={challenge.id} className="p-6 hover:shadow-xl hover:scale-105 transition-all bg-gradient-to-br from-card to-accent/5 border-accent/20">
+                  <div className="flex items-start gap-4">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-accent/20 to-coral/20">
+                      <Icon className="w-8 h-8 text-accent" />
                     </div>
                     
-                    <Button className="w-full bg-gradient-to-r from-accent to-coral hover:from-accent/90 hover:to-coral/90 text-white shadow-md">
-                      Começar Desafio
-                    </Button>
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">{challenge.title}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="outline" className="border-accent/30">
+                            {difficulty}
+                          </Badge>
+                          <Badge variant="outline" className="border-primary/30">
+                            👥 {participants} participantes
+                          </Badge>
+                          <Badge variant="outline" className="border-golden/30 text-golden">
+                            {challenge.reward}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        className="w-full bg-gradient-to-r from-accent to-coral hover:from-accent/90 hover:to-coral/90 text-white shadow-md disabled:opacity-50"
+                        onClick={() => handleStartChallenge(challenge)}
+                        disabled={isActive}
+                      >
+                        {isActive ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Já Ativo
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Começar Desafio
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>
