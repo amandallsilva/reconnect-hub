@@ -1,27 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { sender: "assistant", text: "Olá! Como posso ajudar você hoje?" }
-  ]);
   const [input, setInput] = useState("");
+  const { messages, sendMessage } = useChat();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const handleSend = () => {
-    if (input.trim()) {
-      setMessages([...messages, { sender: "user", text: input }]);
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    if (!user) {
+      toast({
+        title: "Faça login primeiro",
+        description: "Você precisa estar logado para enviar mensagens",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await sendMessage(input);
+    
+    if (error) {
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
       setInput("");
-      
-      // Simulate response
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          sender: "assistant", 
-          text: "Obrigado pela mensagem! Um especialista entrará em contato em breve." 
-        }]);
-      }, 1000);
     }
   };
 
@@ -45,22 +58,28 @@ export function ChatWidget() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
-            {messages.map((msg, idx) => (
-              <div 
-                key={idx} 
-                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div 
-                  className={`max-w-[85%] sm:max-w-[75%] px-3 sm:px-4 py-2 rounded-2xl ${
-                    msg.sender === "user" 
-                      ? "bg-primary text-primary-foreground" 
-                      : "bg-muted text-foreground"
-                  }`}
-                >
-                  <p className="text-xs sm:text-sm">{msg.text}</p>
-                </div>
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                <p>Envie uma mensagem para começar</p>
               </div>
-            ))}
+            ) : (
+              messages.map((msg) => (
+                <div 
+                  key={msg.id} 
+                  className={`flex ${msg.is_from_user ? "justify-end" : "justify-start"}`}
+                >
+                  <div 
+                    className={`max-w-[85%] sm:max-w-[75%] px-3 sm:px-4 py-2 rounded-2xl ${
+                      msg.is_from_user 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted text-foreground"
+                    }`}
+                  >
+                    <p className="text-xs sm:text-sm">{msg.message}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           
           <div className="p-3 sm:p-4 border-t border-border">

@@ -3,17 +3,49 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MessageCircle, Send, Trash2, Award } from "lucide-react";
-import { useData } from "@/contexts/DataContext";
-import { useState } from "react";
+import { Heart, Send, Trash2, Users, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCommunity } from "@/hooks/useCommunity";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
+
+interface UserProfile {
+  name: string;
+  avatar: string | null;
+  level: number;
+}
 
 export default function Community() {
-  const { profile, posts, addPost, toggleLike, deletePost } = useData();
+  const { user } = useAuth();
+  const { isAdmin, isSpecialist } = useUserRole();
+  const { posts, addPost, toggleLike, deletePost, loading } = useCommunity();
   const [newPostContent, setNewPostContent] = useState("");
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { toast } = useToast();
 
-  const handleSubmitPost = () => {
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('name, avatar, level')
+      .eq('id', user.id)
+      .single();
+
+    if (!error && data) {
+      setUserProfile(data);
+    }
+  };
+
+  const handleSubmitPost = async () => {
     if (newPostContent.trim().length < 10) {
       toast({
         title: "Post muito curto",
@@ -23,12 +55,38 @@ export default function Community() {
       return;
     }
 
-    addPost(newPostContent);
-    setNewPostContent("");
-    toast({
-      title: "Post publicado! 🎉",
-      description: "Sua publicação foi compartilhada com a comunidade"
-    });
+    const { error } = await addPost(newPostContent);
+    
+    if (error) {
+      toast({
+        title: "Erro ao publicar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      setNewPostContent("");
+      toast({
+        title: "Post publicado! 🎉",
+        description: "Sua publicação foi compartilhada com a comunidade"
+      });
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    const { error } = await deletePost(postId);
+    
+    if (error) {
+      toast({
+        title: "Erro ao deletar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Post deletado",
+        description: "Sua publicação foi removida"
+      });
+    }
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -53,167 +111,162 @@ export default function Community() {
       .slice(0, 2);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg">Carregando comunidade...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-4xl">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="space-y-2 sm:space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
-          Comunidade ReConectar
-        </h1>
-        <p className="text-muted-foreground text-base sm:text-lg">
-          Compartilhe sua jornada e inspire outras pessoas 💬
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-2">
+          <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Comunidade ReConectar
+          </h1>
+        </div>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Compartilhe suas conquistas e inspire outros
         </p>
       </div>
 
-      {/* Create Post */}
-      <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 shadow-md">
-        <div className="flex gap-4">
-          <Avatar className="w-12 h-12 ring-2 ring-primary/20">
-            <AvatarImage src={profile.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
-              {getInitials(profile.name)}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1 space-y-3">
-            <Textarea
-              placeholder="Compartilhe sua experiência, conquista ou reflexão..."
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-              className="min-h-[100px] resize-none border-primary/20 focus:border-primary"
-            />
+      {/* Create Post Card */}
+      {userProfile && (
+        <Card className="p-4 sm:p-6 bg-gradient-to-br from-card to-primary/5 border-primary/20">
+          <div className="flex gap-3 sm:gap-4">
+            <Avatar className="w-10 h-10 sm:w-12 sm:h-12 ring-2 ring-primary/20">
+              <AvatarImage src={userProfile.avatar || ''} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                {getInitials(userProfile.name)}
+              </AvatarFallback>
+            </Avatar>
             
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">
-                {newPostContent.length} / 500 caracteres
-              </span>
-              <Button
-                onClick={handleSubmitPost}
-                disabled={newPostContent.trim().length < 10}
-                className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-md"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Publicar
-              </Button>
+            <div className="flex-1 space-y-3">
+              <Textarea
+                placeholder="Compartilhe sua experiência, conquista ou reflexão..."
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="min-h-[80px] sm:min-h-[100px] resize-none border-primary/20 focus:border-primary text-sm sm:text-base"
+                maxLength={500}
+              />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">
+                  {newPostContent.length} / 500 caracteres
+                </span>
+                <Button
+                  onClick={handleSubmitPost}
+                  disabled={newPostContent.trim().length < 10}
+                  size="sm"
+                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-md"
+                >
+                  <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="text-sm">Publicar</span>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Posts Feed */}
       <div className="space-y-4">
-        {posts.map((post) => (
-          <Card
-            key={post.id}
-            className={`p-6 hover:shadow-lg transition-all ${
-              post.author.isExpert
-                ? "bg-gradient-to-br from-golden/10 to-primary/10 border-golden/30"
-                : "bg-card border-border"
-            }`}
-          >
-            <div className="space-y-4">
-              {/* Author Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex gap-3">
-                  <Avatar className="w-12 h-12 ring-2 ring-primary/20">
-                    <AvatarImage src={post.author.avatar} />
-                    <AvatarFallback className={
-                      post.author.isExpert
-                        ? "bg-gradient-to-br from-golden to-primary text-white"
-                        : "bg-gradient-to-br from-primary to-secondary text-white"
-                    }>
-                      {getInitials(post.author.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{post.author.name}</span>
-                      {post.author.isExpert && (
-                        <Badge className="bg-golden/20 text-golden border-golden/30 gap-1">
-                          <Award className="w-3 h-3" />
-                          Especialista
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>@{post.author.username}</span>
-                      {post.author.isExpert && post.author.expertise && (
-                        <>
-                          <span>•</span>
-                          <span>{post.author.expertise}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
+        {posts.length === 0 ? (
+          <Card className="p-8 text-center">
+            <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              Seja o primeiro a compartilhar algo na comunidade!
+            </p>
+          </Card>
+        ) : (
+          posts.map((post) => {
+            const canDelete = user && (post.author_id === user.id || isAdmin || isSpecialist);
 
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {formatTimestamp(post.timestamp)}
-                  </span>
-                  {!post.author.isExpert && post.author.username === profile.username && (
+            return (
+              <Card
+                key={post.id}
+                className="p-4 sm:p-6 hover:shadow-lg transition-all bg-card border-border"
+              >
+                <div className="space-y-4">
+                  {/* Author Header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex gap-2 sm:gap-3 min-w-0 flex-1">
+                      <Avatar className="w-10 h-10 sm:w-12 sm:h-12 ring-2 ring-primary/20 flex-shrink-0">
+                        <AvatarImage src={post.author.avatar || ''} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                          {getInitials(post.author.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm sm:text-base truncate">
+                            {post.author.name}
+                          </span>
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
+                            Nível {post.author.level}
+                          </Badge>
+                        </div>
+                        <span className="text-xs sm:text-sm text-muted-foreground">
+                          {formatTimestamp(post.created_at)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap">
+                    {post.content}
+                  </p>
+
+                  {post.image && (
+                    <img
+                      src={post.image}
+                      alt="Post image"
+                      className="rounded-lg w-full max-h-64 sm:max-h-96 object-cover"
+                    />
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-4 sm:gap-6 pt-2 border-t border-border">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        deletePost(post.id);
-                        toast({
-                          title: "Post excluído",
-                          description: "Sua publicação foi removida"
-                        });
-                      }}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => toggleLike(post.id)}
+                      className={`gap-2 ${
+                        post.liked_by_user
+                          ? "text-red-500 hover:text-red-600"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Heart
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                          post.liked_by_user ? "fill-current" : ""
+                        }`}
+                      />
+                      <span className="text-sm">{post.likes}</span>
                     </Button>
-                  )}
+                  </div>
                 </div>
-              </div>
-
-              {/* Content */}
-              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                {post.content}
-              </p>
-
-              {post.image && (
-                <img
-                  src={post.image}
-                  alt="Post image"
-                  className="rounded-lg w-full max-h-96 object-cover"
-                />
-              )}
-
-              {/* Actions */}
-              <div className="flex items-center gap-6 pt-2 border-t border-border">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleLike(post.id)}
-                  className={`gap-2 ${
-                    post.likedByUser
-                      ? "text-destructive hover:text-destructive"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  <Heart
-                    className={`w-5 h-5 ${post.likedByUser ? "fill-current" : ""}`}
-                  />
-                  {post.likes > 0 && <span>{post.likes}</span>}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 text-muted-foreground"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  {post.comments > 0 && <span>{post.comments}</span>}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+              </Card>
+            );
+          })
+        )}
       </div>
     </div>
   );

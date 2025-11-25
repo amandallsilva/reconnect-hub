@@ -1,19 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Leaf } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn, user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isAdmin, isSpecialist } = useUserRole();
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      // Redirect based on role
+      if (isAdmin || isSpecialist) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, isAdmin, isSpecialist, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Auth logic will go here
-    window.location.href = "/dashboard";
+    setLoading(true);
+
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      toast({
+        title: "Erro ao entrar",
+        description: error.message === "Invalid login credentials" 
+          ? "Email ou senha incorretos" 
+          : error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Login realizado!",
+        description: "Bem-vindo de volta ao ReConectar"
+      });
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -60,8 +97,12 @@ export default function Login() {
             </Link>
           </div>
 
-          <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-            Entrar
+          <Button 
+            type="submit" 
+            className="w-full bg-accent hover:bg-accent/90"
+            disabled={loading}
+          >
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
 
