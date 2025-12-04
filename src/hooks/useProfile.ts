@@ -10,6 +10,7 @@ export interface Profile {
   level: number;
   xp: number;
   digital_detox_days: number;
+  bio?: string | null;
 }
 
 export function useProfile() {

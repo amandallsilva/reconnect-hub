@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          reward_badge: string | null
+          reward_xp: number | null
+          title: string
+          total_days: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          reward_badge?: string | null
+          reward_xp?: number | null
+          title: string
+          total_days?: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          reward_badge?: string | null
+          reward_xp?: number | null
+          title?: string
+          total_days?: number
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string | null
@@ -133,6 +172,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar: string | null
+          bio: string | null
           created_at: string | null
           digital_detox_days: number | null
           email: string | null
@@ -144,6 +184,7 @@ export type Database = {
         }
         Insert: {
           avatar?: string | null
+          bio?: string | null
           created_at?: string | null
           digital_detox_days?: number | null
           email?: string | null
@@ -155,6 +196,7 @@ export type Database = {
         }
         Update: {
           avatar?: string | null
+          bio?: string | null
           created_at?: string | null
           digital_detox_days?: number | null
           email?: string | null
@@ -201,6 +243,47 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          current_day: number | null
+          daily_tasks: Json | null
+          id: string
+          progress: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          current_day?: number | null
+          daily_tasks?: Json | null
+          id?: string
+          progress?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          current_day?: number | null
+          daily_tasks?: Json | null
+          id?: string
+          progress?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
             referencedColumns: ["id"]
           },
         ]

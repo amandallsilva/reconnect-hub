@@ -9,11 +9,11 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Trophy, Calendar, Target, TrendingUp, Award, Shield, Star, Flame, Edit2, Save, X, Camera, Upload } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import achievementsImg from "@/assets/achievements.jpg";
-
 const achievements = [
   { icon: Trophy, name: "Primeiro Desafio" },
   { icon: Award, name: "7 Dias Consecutivos" },
@@ -35,6 +35,7 @@ const weeklyReport = [
 
 export default function Profile() {
   const { profile, updateProfile, loading } = useData();
+  const { isSpecialist, isAdmin } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
   const { toast } = useToast();
@@ -210,9 +211,17 @@ export default function Profile() {
             ) : (
               <>
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
-                    {profile.name}
-                  </h1>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-reconnect-green bg-clip-text text-transparent">
+                      {profile.name}
+                    </h1>
+                    {(isSpecialist || isAdmin) && (
+                      <Badge className="bg-primary text-primary-foreground gap-1">
+                        <Shield className="w-3 h-3" />
+                        {isAdmin ? 'Admin' : 'Especialista'}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-muted-foreground">@{profile.username}</p>
                   {profile.bio && (
                     <p className="text-sm text-muted-foreground mt-2">{profile.bio}</p>

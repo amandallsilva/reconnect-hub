@@ -13,8 +13,10 @@ export interface Post {
     name: string;
     avatar: string | null;
     level: number;
+    bio?: string | null;
   };
   liked_by_user: boolean;
+  is_specialist: boolean;
 }
 
 export function useCommunity() {
@@ -59,7 +61,7 @@ export function useCommunity() {
       .from('community_posts')
       .select(`
         *,
-        profiles!community_posts_author_id_fkey (name, avatar, level)
+        profiles!community_posts_author_id_fkey (name, avatar, level, bio)
       `)
       .order('created_at', { ascending: false });
 
@@ -70,13 +72,21 @@ export function useCommunity() {
         .select('post_id')
         .eq('user_id', user.id);
 
+      // Get specialist/admin roles
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['specialist', 'admin']);
+
       const likedPostIds = new Set(likesData?.map(l => l.post_id) || []);
+      const specialistIds = new Set(rolesData?.map(r => r.user_id) || []);
 
       setPosts(
         postsData.map(post => ({
           ...post,
           author: post.profiles,
-          liked_by_user: likedPostIds.has(post.id)
+          liked_by_user: likedPostIds.has(post.id),
+          is_specialist: specialistIds.has(post.author_id)
         })) as Post[]
       );
     }
