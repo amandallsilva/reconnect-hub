@@ -63,15 +63,16 @@ export function useChat() {
     setLoading(false);
   };
 
-  const sendMessage = async (message: string) => {
-    if (!user || !message.trim()) return;
+  const sendMessage = async (message: string, specialistId?: string) => {
+    if (!user || !message.trim()) return { error: new Error('Missing data') };
 
     const { error } = await supabase
       .from('chat_messages')
       .insert({
         user_id: user.id,
         message: message.trim(),
-        is_from_user: true
+        is_from_user: true,
+        specialist_id: specialistId || null
       });
 
     if (!error) {
@@ -84,6 +85,7 @@ export function useChat() {
   return {
     messages,
     loading,
-    sendMessage
+    sendMessage,
+    refetch: fetchMessages
   };
 }
