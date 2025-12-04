@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/Layout/AppLayout";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Auth pages
 import Login from "./pages/Login";
@@ -35,27 +36,51 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            
-            {/* Admin route */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            
-            {/* Protected routes with layout */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
-            <Route path="/events" element={<AppLayout><Events /></AppLayout>} />
-            <Route path="/challenges" element={<AppLayout><Challenges /></AppLayout>} />
-            <Route path="/community" element={<AppLayout><Community /></AppLayout>} />
-            <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
-            <Route path="/digital-consciousness" element={<AppLayout><DigitalConsciousness /></AppLayout>} />
-            
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                
+                {/* Admin route */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                
+                {/* Protected routes with layout */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <AppLayout><Dashboard /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/events" element={
+                  <ProtectedRoute>
+                    <AppLayout><Events /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/challenges" element={
+                  <ProtectedRoute>
+                    <AppLayout><Challenges /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/community" element={
+                  <ProtectedRoute>
+                    <AppLayout><Community /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <AppLayout><Profile /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/digital-consciousness" element={
+                  <ProtectedRoute>
+                    <AppLayout><DigitalConsciousness /></AppLayout>
+                  </ProtectedRoute>
+                } />
+                
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
           </TooltipProvider>
         </DataProvider>
       </AuthProvider>

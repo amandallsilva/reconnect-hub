@@ -1,11 +1,13 @@
 import { NavLink } from "@/components/NavLink";
-import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut, Moon, Sun, MessageSquare } from "lucide-react";
+import { Home, Calendar, Users, Brain, User, Leaf, Lightbulb, LogOut, Moon, Sun, MessageSquare, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const navItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
@@ -23,8 +25,11 @@ interface SidebarProps {
 export function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
+  const { isAdmin, isSpecialist } = useUserRole();
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
     onNavigate?.();
   };
@@ -66,6 +71,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             <span>{item.label}</span>
           </NavLink>
         ))}
+        
+        {/* Admin Link - only for specialists/admins */}
+        {(isAdmin || isSpecialist) && (
+          <>
+            <Separator className="my-2" />
+            <NavLink
+              to="/admin"
+              onClick={handleNavClick}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all"
+              activeClassName="bg-gradient-to-r from-primary/15 to-secondary/15 text-primary font-semibold shadow-sm"
+            >
+              <Shield className="w-5 h-5" />
+              <span>Painel Admin</span>
+            </NavLink>
+          </>
+        )}
       </nav>
 
       {/* Theme Toggle, Daily Tip & Logout */}
