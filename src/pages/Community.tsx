@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Send, Trash2, Users, Sparkles } from "lucide-react";
+import { Heart, Send, Trash2, Users, Sparkles, Shield, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useCommunity } from "@/hooks/useCommunity";
@@ -23,6 +23,9 @@ export default function Community() {
   const { posts, addPost, toggleLike, deletePost, loading } = useCommunity();
   const [newPostContent, setNewPostContent] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  const [selectedSpecialistId, setSelectedSpecialistId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,6 +89,35 @@ export default function Community() {
         title: "Post deletado",
         description: "Sua publicação foi removida"
       });
+    }
+  };
+
+  const handleContactSpecialist = async (specialistId: string) => {
+    if (!chatMessage.trim() || !user) return;
+
+    const { error } = await supabase
+      .from('chat_messages')
+      .insert({
+        user_id: user.id,
+        specialist_id: specialistId,
+        message: chatMessage,
+        is_from_user: true
+      });
+
+    if (error) {
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Mensagem enviada!",
+        description: "O especialista receberá sua mensagem em breve"
+      });
+      setChatMessage("");
+      setChatOpen(false);
+      setSelectedSpecialistId(null);
     }
   };
 
@@ -207,6 +239,12 @@ export default function Community() {
                           <span className="font-semibold text-sm sm:text-base truncate">
                             {post.author.name}
                           </span>
+                          {post.is_specialist && (
+                            <Badge className="bg-primary text-primary-foreground text-xs flex-shrink-0 gap-1">
+                              <Shield className="w-3 h-3" />
+                              Especialista
+                            </Badge>
+                          )}
                           <Badge variant="secondary" className="text-xs flex-shrink-0">
                             Nível {post.author.level}
                           </Badge>
@@ -261,7 +299,59 @@ export default function Community() {
                       />
                       <span className="text-sm">{post.likes}</span>
                     </Button>
+
+                    {post.is_specialist && user && post.author_id !== user.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSpecialistId(post.author_id);
+                          setChatOpen(true);
+                        }}
+                        className="gap-2 text-primary hover:text-primary/80"
+                      >
+                        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-sm">Contatar</span>
+                      </Button>
+                    )}
                   </div>
+
+                  {/* Contact Modal */}
+                  {chatOpen && selectedSpecialistId === post.author_id && (
+                    <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-medium">Enviar mensagem para {post.author.name}</span>
+                      </div>
+                      <Textarea
+                        placeholder="Escreva sua mensagem..."
+                        value={chatMessage}
+                        onChange={(e) => setChatMessage(e.target.value)}
+                        className="min-h-[80px]"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleContactSpecialist(post.author_id)}
+                          disabled={!chatMessage.trim()}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setChatOpen(false);
+                            setChatMessage("");
+                            setSelectedSpecialistId(null);
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Card>
             );
