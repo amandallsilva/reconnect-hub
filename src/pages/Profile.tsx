@@ -34,7 +34,7 @@ const weeklyReport = [
 ];
 
 export default function Profile() {
-  const { profile, updateProfile } = useData();
+  const { profile, updateProfile, loading } = useData();
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
   const { toast } = useToast();
@@ -45,8 +45,8 @@ export default function Profile() {
     setEditedProfile(profile);
   }, [profile]);
 
-  const handleSave = () => {
-    updateProfile(editedProfile);
+  const handleSave = async () => {
+    await updateProfile(editedProfile);
     setIsEditing(false);
     toast({
       title: "Perfil atualizado! ✨",
@@ -58,6 +58,14 @@ export default function Profile() {
     setEditedProfile(profile);
     setIsEditing(false);
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

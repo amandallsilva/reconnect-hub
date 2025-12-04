@@ -1,4 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile, Profile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface UserProfile {
   id: string;
@@ -13,154 +16,63 @@ export interface UserProfile {
   activeChallenges: number;
 }
 
-export interface Post {
-  id: string;
-  author: {
-    name: string;
-    username: string;
-    avatar?: string;
-    isExpert?: boolean;
-    expertise?: string;
-  };
-  content: string;
-  image?: string;
-  likes: number;
-  comments: number;
-  timestamp: string;
-  likedByUser: boolean;
-}
-
 interface DataContextType {
   profile: UserProfile;
-  updateProfile: (updates: Partial<UserProfile>) => void;
-  posts: Post[];
-  addPost: (content: string, image?: string) => void;
-  toggleLike: (postId: string) => void;
-  deletePost: (postId: string) => void;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  loading: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const defaultProfile: UserProfile = {
-  id: "user-1",
-  name: "João da Silva",
-  username: "joao_silva",
-  email: "joao@email.com",
-  bio: "Em busca de uma vida mais equilibrada e consciente 🌱",
-  level: 7,
-  xp: 3250,
-  daysWithoutAI: 12,
-  activeChallenges: 5,
+  id: "guest",
+  name: "Visitante",
+  username: "visitante",
+  email: "",
+  level: 1,
+  xp: 0,
+  daysWithoutAI: 0,
+  activeChallenges: 0,
 };
 
-const expertPosts: Post[] = [
-  {
-    id: "expert-1",
-    author: {
-      name: "Dra. Ana Costa",
-      username: "dra_anacosta",
-      isExpert: true,
-      expertise: "Psicóloga Digital"
-    },
-    content: "A desintoxicação digital não é sobre eliminar completamente a tecnologia, mas sobre criar uma relação mais saudável com ela. Comece com pequenos passos: 30 minutos sem telas antes de dormir pode transformar sua qualidade de sono! 💤✨",
-    likes: 234,
-    comments: 45,
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    likedByUser: false
-  },
-  {
-    id: "expert-2",
-    author: {
-      name: "Prof. Carlos Mendes",
-      username: "prof_mendes",
-      isExpert: true,
-      expertise: "Neurocientista"
-    },
-    content: "Estudos mostram que 20 minutos de leitura por dia podem reduzir o estresse em até 68%. A leitura ativa áreas do cérebro diferentes das que usamos em telas, promovendo um descanso cognitivo real. 📚🧠",
-    likes: 189,
-    comments: 32,
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    likedByUser: true
-  },
-  {
-    id: "expert-3",
-    author: {
-      name: "Maria Oliveira",
-      username: "maria_wellness",
-      isExpert: true,
-      expertise: "Coach de Bem-estar"
-    },
-    content: "Dica prática: crie 'zonas livres de tecnologia' em casa. A mesa de jantar e o quarto são ótimos lugares para começar. Isso ajuda a reconectar com família e com você mesmo! 🏡💚",
-    likes: 312,
-    comments: 67,
-    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-    likedByUser: false
-  }
-];
-
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem("reconectar-profile");
-    return saved ? JSON.parse(saved) : defaultProfile;
-  });
-
-  const [posts, setPosts] = useState<Post[]>(() => {
-    const saved = localStorage.getItem("reconectar-posts");
-    const userPosts = saved ? JSON.parse(saved) : [];
-    return [...userPosts, ...expertPosts].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-  });
+  const { user } = useAuth();
+  const { profile: dbProfile, loading: profileLoading, updateProfile: updateDbProfile } = useProfile();
+  const [activeChallenges, setActiveChallenges] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem("reconectar-profile", JSON.stringify(profile));
-  }, [profile]);
+    // Count active challenges from localStorage for now
+    const saved = localStorage.getItem("reconectar-challenges");
+    if (saved) {
+      const challenges = JSON.parse(saved);
+      setActiveChallenges(challenges.length);
+    }
+  }, []);
 
-  useEffect(() => {
-    const userPosts = posts.filter(p => !p.author.isExpert);
-    localStorage.setItem("reconectar-posts", JSON.stringify(userPosts));
-  }, [posts]);
+  const profile: UserProfile = dbProfile ? {
+    id: dbProfile.id,
+    name: dbProfile.name,
+    username: dbProfile.name.toLowerCase().replace(/\s+/g, '_'),
+    email: dbProfile.email || '',
+    avatar: dbProfile.avatar || undefined,
+    level: dbProfile.level,
+    xp: dbProfile.xp,
+    daysWithoutAI: dbProfile.digital_detox_days,
+    activeChallenges
+  } : defaultProfile;
 
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile(prev => ({ ...prev, ...updates }));
-  };
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!user) return;
 
-  const addPost = (content: string, image?: string) => {
-    const newPost: Post = {
-      id: `post-${Date.now()}`,
-      author: {
-        name: profile.name,
-        username: profile.username,
-        avatar: profile.avatar,
-        isExpert: false
-      },
-      content,
-      image,
-      likes: 0,
-      comments: 0,
-      timestamp: new Date().toISOString(),
-      likedByUser: false
-    };
+    const dbUpdates: Partial<Profile> = {};
+    if (updates.name) dbUpdates.name = updates.name;
+    if (updates.email) dbUpdates.email = updates.email;
+    if (updates.avatar) dbUpdates.avatar = updates.avatar;
+    if (updates.daysWithoutAI !== undefined) dbUpdates.digital_detox_days = updates.daysWithoutAI;
+    if (updates.xp !== undefined) dbUpdates.xp = updates.xp;
+    if (updates.level !== undefined) dbUpdates.level = updates.level;
 
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const toggleLike = (postId: string) => {
-    setPosts(prev =>
-      prev.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              likes: post.likedByUser ? post.likes - 1 : post.likes + 1,
-              likedByUser: !post.likedByUser
-            }
-          : post
-      )
-    );
-  };
-
-  const deletePost = (postId: string) => {
-    setPosts(prev => prev.filter(post => post.id !== postId));
+    await updateDbProfile(dbUpdates);
   };
 
   return (
@@ -168,10 +80,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         profile,
         updateProfile,
-        posts,
-        addPost,
-        toggleLike,
-        deletePost
+        loading: profileLoading
       }}
     >
       {children}

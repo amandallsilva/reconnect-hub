@@ -6,7 +6,15 @@ import heroWellness from "@/assets/hero-wellness.jpg";
 import { useData } from "@/contexts/DataContext";
 
 export default function Dashboard() {
-  const { profile } = useData();
+  const { profile, loading } = useData();
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl">
