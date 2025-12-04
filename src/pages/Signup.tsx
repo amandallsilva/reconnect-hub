@@ -4,14 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
-import { Leaf } from "lucide-react";
+import { Leaf, User, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+type AccountType = 'user' | 'specialist';
 
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState<AccountType>('user');
   const [loading, setLoading] = useState(false);
   const { signUp, user } = useAuth();
   const { toast } = useToast();
@@ -37,7 +41,7 @@ export default function Signup() {
       return;
     }
 
-    const { error } = await signUp(email, password, name);
+    const { error } = await signUp(email, password, name, accountType);
 
     if (error) {
       toast({
@@ -48,7 +52,9 @@ export default function Signup() {
     } else {
       toast({
         title: "Conta criada com sucesso!",
-        description: "Bem-vindo ao ReConectar"
+        description: accountType === 'specialist' 
+          ? "Bem-vindo ao ReConectar como Especialista!" 
+          : "Bem-vindo ao ReConectar"
       });
     }
     
@@ -69,6 +75,39 @@ export default function Signup() {
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
+          {/* Account Type Selection */}
+          <div className="space-y-3">
+            <Label>Tipo de conta</Label>
+            <RadioGroup 
+              value={accountType} 
+              onValueChange={(value) => setAccountType(value as AccountType)}
+              className="grid grid-cols-2 gap-3"
+            >
+              <div>
+                <RadioGroupItem value="user" id="user" className="peer sr-only" />
+                <Label 
+                  htmlFor="user" 
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all"
+                >
+                  <User className="mb-2 h-6 w-6" />
+                  <span className="text-sm font-medium">Usuário</span>
+                  <span className="text-xs text-muted-foreground">Conta pessoal</span>
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem value="specialist" id="specialist" className="peer sr-only" />
+                <Label 
+                  htmlFor="specialist" 
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer transition-all"
+                >
+                  <Shield className="mb-2 h-6 w-6" />
+                  <span className="text-sm font-medium">Especialista</span>
+                  <span className="text-xs text-muted-foreground">Profissional</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="name">Nome completo</Label>
             <Input
@@ -111,7 +150,7 @@ export default function Signup() {
             className="w-full bg-accent hover:bg-accent/90"
             disabled={loading}
           >
-            {loading ? "Criando conta..." : "Criar Conta"}
+            {loading ? "Criando conta..." : accountType === 'specialist' ? "Criar Conta de Especialista" : "Criar Conta"}
           </Button>
         </form>
 
